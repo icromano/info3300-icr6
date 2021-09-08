@@ -52,7 +52,12 @@
     <!--- SVG goes here! --->
     <svg width=500 height=500 style="border: 1px solid black; margin: 30px;">
       <!-- svg works in pixels -->
-      <circle cx=50 cy=300 r=30px fill="purple"/>
+      <!-- in svg, x goes from L to R, y goes Top to Bottom -->
+      <circle cx=50 cy=300 r=30px fill="purple"/> 
+      <line x1=25 x2=300 y1=25 y2=300 stroke="goldenrod" stroke-width=3/>
+      <rect x=100 y=400 width=200 height=200 fill="orange" stroke="limegreen" stroke-width=5/>
+      <rect x=100 y=400 width=200 height=200 style="fill:deepskyblue; stroke:red; stroke-width:3;"/>
+      <text x=100 y=100 style="font: bold 20px sans-serif;"/>
     </svg>
     
 

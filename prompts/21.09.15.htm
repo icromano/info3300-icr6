@@ -67,37 +67,148 @@
     console.log(width, height);
 
     // d3 scales: takes data in and returns pixels
-    // domain and range take list of min and max
-    let ageScale = d3.scaleLinear().domain([dataMin, dataMax]).range([pixelMin, pixelMax])
+    // domain takes list of dataMin and dataMax
+    // range takes list of pixelMin and pixelMax and adds some padding
+    let ageScale = d3.scaleLinear()
+                      .domain([0, 80])
+                      .range([10, width-10]);
+    console.log(ageScale);
+    console.log(ageScale(40));
+    console.log(ageScale(0));
 
-    
+    let maxMortality = d3.max( passengers, d => Math.max( d.lived, d.died ) );
+
+    let livedScale = d3.scaleLinear()
+                        .domain([0, maxMortality])
+                        .range([0, height/2.0-10]);
+    console.log(livedScale(120));
+
+    passengers.forEach( (d, i) => {
+      console.log(d);
+
+      svg.append("line")
+          .attr("x1", ageScale(d.age))
+          .attr("x2", ageScale(d.age))
+          .attr("y1", height/2.0)
+          .attr("y2", height/2.0-livedScale(d.lived)) //need to do this weird reverse thing so do subtraction
+          .style("stroke", "#5555f0")
+          .style("stroke-width",10)
+    } );
     
     // --- 2. What about deaths? (oop, things are getting pretty dark)
     //  We can make a double histogram for this!
     
+    let diedScale = d3.scaleLinear()
+                      .domain([0,maxMortality])
+                      .range([0, height/2.0 - 10])
     
-    
+    passengers.forEach( (d, i) => {
+    console.log(d);
+
+    svg.append("line")
+        .attr("x1", ageScale(d.age))
+        .attr("x2", ageScale(d.age))
+        .attr("y1", height/2.0)
+        .attr("y2", height/2.0+livedScale(d.lived)) 
+        .style("stroke", "#f05555")
+        .style("stroke-width",10)
+    } );
 
 
+    passengers.forEach( (d,i) => {
+      svg.append("text")
+          .attr("text-anchor", "middle")
+          .attr("font-size", "15px")
+          .attr("x", ageScale(d.age))
+          .attr("y", height/2.0 - livedScale(d.lived)-10)
+          .text(d['age'])
+    });
 
 
     // --- 3. Let's break the data down by gender now!
     
+    passengersMale.forEach( d => {
+      if (d.lived + d.died > 0){
+        d.percentSurvived = d.lived/(d.lived + d.died);
+      }
+      else {
+        d.percentSurvived = 0;
+      }
+      
+    });
+    passengersFemale.forEach( d => {
+      if (d.lived + d.died > 0){
+        d.percentSurvived = d.lived/(d.lived + d.died);
+      }
+      else {
+        d.percentSurvived = 0;
+      }
+    });
+    console.log(passengersMale);
+    console.log(passengersFemale);
     
+    svg = d3.select("svg#male"); //overwrite by deleting let
+    console.log(svg);
+    width = svg.attr("width");
+    height = svg.attr("height");
     
-    
-    
-    
+    ageScale = d3.scaleLinear()
+                  .domain([0, 80])
+                  .range([10, width-10]);
 
-    // svg.append("text").text("Male Passengers").attr("x",10).attr("y",20).style("font-size","15px");
+    let percentScale = d3.scaleLinear()
+                          .domain([0,1])
+                          .range([height - 10, 30]); // min is greater than max, inversion trick [max, min]
+
+    let colorScale = d3.scaleLinear()
+                        .domain([0,1])
+                        .range(['navy', 'turquoise'])
+                        .interpolate(d3.interpolateHcl);
+
+    svg.append("text").text("Male Passengers").attr("x",10).attr("y",20).style("font-size","15px");
+
+    passengersMale.forEach( (d, i) => {
+    console.log(d);
+
+    svg.append("line")
+        .attr("x1", ageScale(d.age))
+        .attr("x2", ageScale(d.age))
+        .attr("y1", percentScale(d.percentSurvived))
+        .attr("y2", height-10) 
+        .style("stroke", colorScale(d.percentSurvived))
+        .style("stroke-width",10)
+
+      svg.append("text")
+          .attr("text-anchor", "middle")
+          .attr("font-size", "15px")
+          .attr("x", ageScale(d.age))
+          .attr("y", percentScale(d.percentSurvived)-10)
+          .text(d['age'])
+    });
 
 
 
 
-
-    // svg.append("text").text("Female Passengers").attr("x",10).attr("y",20).style("font-size","15px");
+    svg.append("text").text("Female Passengers").attr("x",10).attr("y",20).style("font-size","15px");
     
-    
+    passengersFemale.forEach( (d, i) => {
+    console.log(d);
+
+    svg.append("line")
+        .attr("x1", ageScale(d.age))
+        .attr("x2", ageScale(d.age))
+        .attr("y1", percentScale(d.percentSurvived))
+        .attr("y2", height-10) 
+        .style("stroke", colorScale(d.percentSurvived))
+        .style("stroke-width",10)
+        
+      svg.append("text")
+          .attr("text-anchor", "middle")
+          .attr("font-size", "15px")
+          .attr("x", ageScale(d.age))
+          .attr("y", percentScale(d.percentSurvived)-10)
+          .text(d['age'])
+    });
     
     
     

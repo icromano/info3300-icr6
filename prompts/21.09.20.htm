@@ -77,8 +77,8 @@
     // console.log(data); doesn't work because all code has to happen within the promise
 
     // if put file name in wrong, it will throw error
-    // d3.json('../datasets/titanics.json').then((data) => {console.log(data)},
-    //                                           (error) => {console,log('error',error)});
+    d3.json('../datasets/titanics.json')
+      .then( (data) => { console.log('data', data); }, (error) => { console.log('error',error); } );
                 
     // --- 2
     // Let's make a plain old scatterplot

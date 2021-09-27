@@ -111,23 +111,50 @@
     
     
     // 1. Old way
-  
-    
+    // let elements = demo.selectAll("circle")
+    //                     .data(circles);
+    // // Exit - remove elements that no longer exist
+    // elements.exit()
+    //         .remove();
+    // //Enter - elements that need to be created
+    // elements.enter()
+    //         .append("circle")
+    //         .attr("r", 20)
+    //         //Update - update existing elements
+    //         .merge(elements)
+    //         .attr("cx", d => d.x)
+    //         .attr("cy", function(d) { return d.y})
+    //         .attr("fill", d => { return colorScale(d.age) });
     
     
     // 2. New way - shorthand version
-    
+    // let elements = demo.selectAll("circle")
+    //                   .data(circles)
+    //                   .join('circle')
+    //                   .attr("r", 20)
+    //                   .attr("cx", d => d.x)
+    //                   .attr("cy", function(d) { return d.y})
+    //                   .attr("fill", d => { return colorScale(d.age) })
     
        
        
     // 3. New way - extended version
     //  You'll use this one when you have custom behavior for circles being added, changed, or removed
     //     (a good example of this is animating when circles enter and exit the canvas -- we'll do something like this in coming weeks )
-    
-    
-       
-               
-    
+    let elements = demo.selectAll("circle")
+                      .data(circles)
+                      .join(
+                        enter => { enter.append("circle") 
+                                        .attr("r", 20)
+                                        .attr("cx", d => d.x)
+                                        .attr("cy", function(d) { return d.y})
+                                        .attr("fill", d => { return colorScale(d.age) })},
+                        update => { update.attr("circle") 
+                                        .attr("r", 20)
+                                        .attr("cx", d => d.x)
+                                        .attr("cy", function(d) { return d.y})
+                                        .attr("fill", d => { return colorScale(d.age) })}
+                      )
     
   }
   
@@ -220,45 +247,45 @@
     
   
   // CONVERT TO USE A DATA JOIN
-  data.forEach( (d, i) => {
-    
-    let circle = chartArea.append("circle")
-        .attr("cx", yearScale(d['year']))
-        .attr("cy", grossScale(d['worldwide_gross']+1))
-        .attr("r", imdbScale(d['imdb_rating']))
-        .attr("opacity", 0.8)
-        .attr("fill", genreScale(d['Main_Genre']) )  // refer to scaleOrdinal in scales section
-        .attr("label", d["title"])
-        .attr("genre", d["Main_Genre"]);
+  let circles = chartArea.selectAll("circle")
+                  .data(data)
+                  .join('circle')
+                  .attr("cx", d => yearScale(d['year']))
+                  .attr("cy", d => grossScale(d['worldwide_gross']+1))
+                  .attr("r", d => imdbScale(d['imdb_rating']))
+                  .attr("opacity", 0.8)
+                  .attr("fill", d => genreScale(d['Main_Genre']) )  // refer to scaleOrdinal in scales section
+                  .attr("label", d => d["title"])
+                  .attr("genre", d => d["Main_Genre"]);
     
     
     // Also will need updating?
-    circle.on("mouseover", function() {
+    circles.on("mouseover", function() {
       
       d3.select(this)
         .transition().duration(200)
         .attr("stroke","black")
         .attr("stroke-width", 4)
-        .attr("r", imdbScale(d['imdb_rating']) + 2)
-        .attr("fill", lighten( genreScale(d['Main_Genre']) ));
-      
-      d3.select("#label").text(d['title']);
+        .attr("r", d => imdbScale(d['imdb_rating']) + 2)
+        .attr("fill", d => lighten( genreScale(d['Main_Genre']) ));
+
+      circleData = d3.select(this).datum();
+      d3.select("#label").text(circleData['title']);
     });
     
-    circle.on("mouseout", function() {
+    circles.on("mouseout", function() {
       
       d3.select(this)
         .transition().duration(200)
         .attr("stroke-width", 0)
-        .attr("r", imdbScale(d['imdb_rating']))
-        .attr("fill", genreScale(d['Main_Genre']) );
+        .attr("r", d => imdbScale(d['imdb_rating']))
+        .attr("fill", d => genreScale(d['Main_Genre']) );
       
       d3.select("#label").text("");
     });
       
     
 
-  });
   // done with forEach
   
   

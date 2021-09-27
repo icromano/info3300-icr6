@@ -46,7 +46,8 @@
     
     
   </svg>
-  
+  <button id="gross">Show by Gross Income</button>
+  <button id="genre">Show by Genre</button> -
   <div id="scatterLegend" class="legend"> </div>
 
 
@@ -173,14 +174,35 @@
         
     // --- 2
     // 5. Add some mouseovers
-    
+    circle.on('mouseover', function() {
+      d3.select(this)
+        .attr("stroke", "black")
+        .attr("stroke-width", 4)
+        .attr("r", imdbScale(d["imdb_rating"])+2)
+        .attr("fill", lighten(genreScale(d['Main_Genre'])));
+
+      d3.select('#label').text(d['title']);
+    });
+
+    circle.on('mouseout', function() {
+      d3.select(this)
+        .attr("stroke-width", 0)
+        .attr("r", imdbScale(d["imdb_rating"]))
+        .attr("fill", genreScale(d['Main_Genre']));
+
+      d3.select('#label').text("");
+    });
     
     
 
   });
   // done with forEach
   
-  
+  // interactivity 
+  d3.select("#gross").on('click', function() {
+    d3.selectAll("circle")
+
+  });
   
   
   // --- 3

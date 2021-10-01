@@ -161,7 +161,7 @@
     .attr("y1",0)
     .attr("y2",chartHeight)
     .attr("visibility","hidden");
-  
+
   let valueMarker = mouseGroup.append("circle")
     .attr("id","valueMarker")
     .attr("fill","none")
@@ -169,10 +169,11 @@
     .attr("stroke-width",2)
     .attr("r",10)
     .attr("visibility","hidden");
-  
+
   let label = mouseGroup.append("text")
     .attr("id","label")
     .attr("visibility","hidden");
+
   
   // chartArea.on('mousemove', function(evt) {
   //   // console.log(evt);
@@ -182,11 +183,11 @@
 
   // on mouse move only triggered when on line, need to add pixels everywhere
   let activeRegion = mouseGroup.append("rect")
-                                .attr("id", "activeRegion")
-                                .attr("width", chartWidth)
-                                .attr("height", chartHeight)
-                                .attr("fill", "none")
-                                .attr("pointer-events", "all");
+    .attr("id","activeRegion")
+    .attr("width",chartWidth)
+    .attr("height",chartHeight)
+    .attr("fill","none")
+    .attr("pointer-events","all");
 
   activeRegion.on('mouseover', function(evt) {
     xMarker.attr("visibility", "");
@@ -199,10 +200,22 @@
     valueMarker.attr("visibility", "hidden");
     label.attr("visibility", "hidden");
   });
+
+  let findDate = d3.bisector( d => d.date ).right;
+
   activeRegion.on('mousemove', function(evt) {
     let location = d3.pointer(evt);
-  });
+    console.log(location);
+    
+    let x = location[0];
+    let y = location[1];
+    let xData = dateScale.invert(x);
+    let yData = carbonScale.invert(y);
 
+    xMarker.attr("x1", x).attr("x2", x);
+    valueMarker.attr("cx", x).attr("cy", y)
+
+  });
   
   
   

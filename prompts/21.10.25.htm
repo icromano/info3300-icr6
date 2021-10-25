@@ -123,7 +123,9 @@
     
     // 1. PAN/ZOOM BEGINS HERE
 
-    chartArea.selectAll("circle.point").data(data)
+    let viewport = chartArea.append("g")
+
+    viewport.selectAll("circle.point").data(data)
              .join("circle").attr("class","point")
              .attr("cx", d => xScale(d['gdp']))
              .attr("cy", d => yScale(d['life']))
@@ -131,8 +133,36 @@
              .attr("opacity", 0.8)
              .style("fill", d => regScale(d.Region));
     
+    var plotZoom = d3.zoom().on('zoom', plotZoomed);
+
+    plot.call(plotZoom); 
+
+    function plotZoomed( event ) {
+      console.log(event);
+
+      viewport.attr('transform', event.transform);
+
+      xAxis.scale(event.transform.rescaleX(xScale));
+      xGridlines.scale(event.transform.rescaleX(xScale));
+      yAxis.scale(event.transform.rescaleX(yScale));
+      yGridlines.scale(event.transform.rescaleX(yScale));
+
+      d3.select('g.x.axis').call(xAxis);
+      d3.select('g.x.gridlines').call(xGridlines);
+      d3.select('g.y.axis').call(yAxis);
+      d3.select('g.y.gridlines').call(yGridlines);
+    }
     
+    plot.append("defs")
+        .append("clipPath")
+        .attr("id", "chartClip")
+        .append("rect").attr("x", 0)
+                        .attr("y", 0)
+                        .attr("width", chartWidth)
+                        .attr("height", chartHeight)
     
+    chartArea.attr("clip-path", "url(#chartClip")
+
 
   }
   drawPlot();
@@ -192,9 +222,28 @@
 
     // 2. PAN AND ZOOM STARTS HERE
     
-    
-    
+    var zoom = d3.zoom()
+                  .scaleExtent([1,10])
+                  .on('zoom', mapZoomed)
 
+    map.call(zoom);
+
+    function mapZoomed({transform}) {
+      viewport.attr("transform", transform)
+
+      viewport.select('.state-outline')
+              .style('stroke-width', 2 / transform.k)
+      viewport.select('.county-outline')
+              .style('stroke-width', 1 / transform.k)
+
+      viewport.select('.county-outline')
+              .attr("visibility", (transform.k > 3) ? "visible" : "hidden")
+
+      viewport.selectAll('.county')
+              .attr("visibility", (transform.k > 3) ? "visible" : "hidden")
+    };
+    
+    map.call()
 
   }
   drawMap();

@@ -152,18 +152,35 @@
     // BEGIN LECTURE CODE
     
     // Just to check, here's code to make SVG circles
-    interactiveArea.selectAll("circle.point").data(data)
-                   .join("circle").attr("class","point")
-                   .attr("r", 3)
-                   .attr("cx", d => xScale(d['year_published']))
-                   .attr("cy", d => yScale(d['average_rating']))
-                   .attr("fill", d => colorScale(d['playing_time']))
+    // interactiveArea.selectAll("circle.point").data(data)
+    //                .join("circle").attr("class","point")
+    //                .attr("r", 3)
+    //                .attr("cx", d => xScale(d['year_published']))
+    //                .attr("cy", d => yScale(d['average_rating']))
+    //                .attr("fill", d => colorScale(d['playing_time']))
                    
                    
     
     // **  Get the "drawing context" for the canvas and draw!
     
-    
+    const context = canvas.node().getContext('2d');
+    context.clearRect(0, 0, width, height);
+
+    context.globalAlpha = 0.6; //opacity 
+
+    data.forEach( (d,i) => {
+      // for each datapoint, draw that circle
+      let x = xScale(d['year_published']);
+      let y = yScale(d['average_rating']);
+      let rad = 3; 
+      let color = colorScale(d['playing_time']);
+
+      context.fillStyle = color;
+      context.beginPath();
+      context.arc(x, y, rad, 0, 2*Math.PI);
+      context.fill();
+
+    })
     
     
     
@@ -349,23 +366,41 @@
   // LECTURE CODE HERE
   
   // Configure the simulation
-
+  const game = new Conway(gameWidth, gameHeight);
+  game.randomizeBoard(0.3);
+  var timer;
   
   // Stop simulation
   function endSimulation() {
+    if (timer) {
+      timer.stop();
+    }
     
   }
   // Start simulation back up
   function startSimulation() {
+    endSimulation();
 
+    timer = d3.timer( function() {
+      game.step();
+      draw();
+    });
   }
   // Randomize sim state
   function randomizeSimulation() {
+    endSimulation();
+    game.randomizeBoard(0.3);
+    draw();
 
   }
   
   // Code up the simulation drawing functions
   //
+  const ctx = gameCanvas.node().getContext('2d');
+  var imageData = ctx.getImageData(0, 0, gameWidth, gameHeight);
+  console.log(imageData);
+  var pixels = imageData.data;
+
   // What we expect: 2d array for colors -- array[y][x]
   //   [[RGBA1,  RGBA2],
   //    [RGBA3,  RGBA4]]
@@ -373,15 +408,42 @@
   //
   // What we get: 1d striped array for colors -- array[locationIn1d + offsetForRGBA] 
   //   [R1,G1,B1,A1, R2,G2,B2,A2, R3,G3,B3,A3, R4,G4,B4,A4,]
+  // dataset looks like --> [RGBARGBARGBA...]
   // So pixel (0,1) starts at index 8
-  
-  
-  
-  
-  
-  
-  
-  
+
+  let liveColor = d3.rgb('#00cc00');
+
+  function draw(){
+    // console.log('drawing');
+
+    for (let y=0; y<gameHeight; y++) {
+      for (let x=0; x<gameWidth; x++){
+
+        let state = game.board[y][x]
+
+        let r = 255;
+        let g = 255;
+        let b = 255;
+
+        if (state){
+          r = liveColor.r;
+          g = liveColor.g;
+          b = liveColor.b;
+        }
+
+        let startingLocation = 4*(y*gameHeight + x);
+        pixels[startingLocation + 0] = r;
+        pixels[startingLocation + 1] = g;
+        pixels[startingLocation + 2] = b;
+        pixels[startingLocation + 3] = 255;
+      }
+    };
+
+    ctx.putImageData(imageData, 0, 0);
+    
+  }
+  draw();
+
   
   // // If you've got a hexadecimal color, e.g. #00CC00, then you can use this code to get RGB:
   // var num = parseInt("#00CC00".replace('#',''), 16);
@@ -400,10 +462,10 @@
     randomizeSimulation();
   });
   
-  // gameCanvas.on("mousemove", function(event) {
-  //   let loc = d3.pointer(event);
-  //   game.paint(loc[0],loc[1],25,0.15);
-  // })
+  gameCanvas.on("mousemove", function(event) {
+    let loc = d3.pointer(event);
+    game.paint(loc[0],loc[1],25,0.15);
+  })
   
   
   

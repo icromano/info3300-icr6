@@ -228,6 +228,8 @@
 
     map.call(zoom);
 
+    map.call(zoom.transform, d3.zoomIdentity);
+
     function mapZoomed({transform}) {
       viewport.attr("transform", transform)
 
@@ -243,7 +245,6 @@
               .attr("visibility", (transform.k > 3) ? "visible" : "hidden")
     };
     
-    map.call()
 
   }
   drawMap();

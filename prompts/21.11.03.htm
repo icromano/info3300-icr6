@@ -66,7 +66,7 @@
     const requestData = async () => {
 
       // Dataset of titanic survivors from a much earlier lecture
-      const passengers = await d3.json("../datasets/titanic.json");
+      let passengers = await d3.json("../datasets/titanic.json");
       const passengers_copy = await d3.json("../datasets/titanic.json");
       const passengers_by_class = await d3.json("../datasets/titanic.json");
 
@@ -104,14 +104,46 @@
 
 
       // --- Notes from class ---
+
+      console.log(passengers_copy);
+
+      <!-- passengers = passengers.slice(0,200); -->
+
+      passengers.forEach( d=> {
+        d.x = d3.randomUniform(10, allWidth-10)();
+        d.y = d3.randomUniform(10, allHeight-10)(); 
+      });
+
+      allLayer.selectAll("circle").data(passengers)
+              .join("circle")
+              .attr("r", 2)
+              .attr("cx", d => d.x)
+              .attr("cy", d => d.y)
+              .attr("fill", d => mortalityScale(d.mortality));
       
+      var passengerSimulation = d3.forceSimulation()
+                                  .nodes(passengers)
+                                  .force("ypos", d3.forceY()
+                                                    .y(allHeight/2.0)
+                                                    .strength(0.05)) 
+                                  .force("xpos", d3.forceX()
+                                                    .x(d => ageScale(d.age))
+                                                    .strength(0.05))
+                                  .force("collision", d3.forceCollide()
+                                                          .radius(2)
+                                                          .iterations(2))
+                                  .on("tick", updateAllPassengerPositions())
+      passengerSimulation.stop();
       
+      console.log(passengerSimulation);
+      console.log(passengers);
+      console.log(passengers_copy);
       
-      
-      
-      
-      
-      
+      function updateAllPassengerPositions() {
+        allLayer.selectAll("circle")
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y)
+      }
       
       
       
